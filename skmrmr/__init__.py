@@ -22,6 +22,7 @@ class MRMR(BaseEstimator, MetaEstimatorMixin):
         self.maxrel = maxrel
         self.mutual_info_difference = mutual_info_difference
         self.normalize = normalize
+        self.estimator_params = estimator_params
         self.verbose = verbose
 
     def fit(self, X, y):
@@ -35,8 +36,8 @@ class MRMR(BaseEstimator, MetaEstimatorMixin):
         X_classes = np.array(list(set(X.reshape((n_samples * n_features,)))))
         y_classes = np.array(list(set(y.reshape((n_samples,)))))
 
-        idxs, _, _ = _mrmr(n_samples, n_features, X, y,
-                X_classes, y_classes, X_classes.shape[0], y_classes.shape[0],
+        idxs, _ = _mrmr(n_samples, n_features, y, X,
+                y_classes, X_classes, y_classes.shape[0], X_classes.shape[0],
                 n_features_to_select,
                 self.maxrel, self.mutual_info_difference, self.normalize)
 
