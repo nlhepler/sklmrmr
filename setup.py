@@ -32,5 +32,5 @@ setup(name='skmrmr',
             'skmrmr': ['*.csv']
       },
       ext_modules=ext_modules,
-      requires=['numpy (>=1.6)', 'scikit-learn (>=0.12.1)']
+      requires=['numpy (>=1.6)', 'sklearn (>=0.12.1)']
      )
