@@ -42,13 +42,18 @@ class MRMR(BaseEstimator, MetaEstimatorMixin):
                 self.maxrel, self.mutual_info_difference, self.normalize)
 
         support_ = np.zeros(n_features, dtype=np.bool)
+        ranking_ = np.ones(n_features, dtype=np.int)
+
         support_[idxs] = True
+        for i, idx in enumerate(idxs):
+            ranking_[idx] += n_features_to_select - i
 
         self.estimator_ = clone(self.estimator)
         self.estimator_.set_params(**self.estimator_params)
         self.estimator_.fit(X[:, support_], y)
         self.n_features_ = support_.sum()
         self.support_ = support_
+        self.ranking_ = ranking_
 
         return self
 

@@ -1,6 +1,5 @@
 
-def main(args=None):
-
+def test1(args=None):
     import csv
     import os.path
     import sys
@@ -62,6 +61,24 @@ def main(args=None):
     for i in range(ns.n_features):
         idx = ks[i] + 1
         print("%d\t%s\t%.3f" % (idx, raw_data[0][idx], scores[i]))
+
+    return 0
+
+def test2():
+    from sklearn.svm import SVC
+    from sklearn.datasets import load_digits
+    from skmrmr import MRMR
+
+    digits = load_digits()
+    X = digits.images.reshape((len(digits.images), -1)).astype(int)
+    y = digits.target
+
+    svc = SVC(kernel='linear', C=1)
+    mrmr = MRMR(estimator=svc, n_features_to_select=5)
+    mrmr.fit(X, y)
+    ranking = mrmr.ranking_
+
+    print(ranking)
 
     return 0
 
