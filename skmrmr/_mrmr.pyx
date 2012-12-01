@@ -14,21 +14,31 @@ itype = np.int
 ctypedef np.float64_t dtype_t
 ctypedef np.int_t itype_t
 
+cdef long MAXREL_, MID_, MIQ_
+MAXREL_ = 0
+MID_ = 1
+MIQ_ = 2
+
+# make them available from python too
+MAXREL = MAXREL_
+MID = MID_
+MIQ = MIQ_
+
 
 @cython.boundscheck(False)
-cdef dtype_t _mi_h(int N, \
+cdef dtype_t _mi_h(long N, \
         itype_t[:] ts, \
         itype_t[:] vs, \
         itype_t[:] tc, \
         itype_t[:] vc, \
-        int n_tc, \
-        int n_vc, \
-        int normalize):
+        long n_tc, \
+        long n_vc, \
+        long normalize):
 
-    cdef int i, j, k
+    cdef long i, j, k
     cdef double p_t, p_v, p_tv
     cdef dtype_t mi, h
-    cdef int n_t, n_v, n_tv
+    cdef long n_t, n_v, n_tv
     cdef itype_t t, v
 
     if N == 0:
@@ -71,26 +81,25 @@ cdef dtype_t _mi_h(int N, \
         return mi
 
 @cython.boundscheck(False)
-def _mrmr(int N, \
-        int M, \
+def _mrmr(long N, \
+        long M, \
         itype_t[:] ts, \
         itype_t[:, :] vs, \
         itype_t[:] tc, \
         itype_t[:] vc, \
-        int n_tc, \
-        int n_vc, \
-        int K, \
-        int maxrel, \
-        int mid, \
-        int normalize):
+        long n_tc, \
+        long n_vc, \
+        long K, \
+        long method, \
+        long normalize):
 
-    cdef int i, j, k
+    cdef long i, j, k
     cdef np.ndarray[dtype_t, ndim=1] relevances
     cdef np.ndarray[dtype_t, ndim=1] redundancies
     cdef np.ndarray[itype_t, ndim=1] ks
     cdef np.ndarray[dtype_t, ndim=1] scores
     cdef double max_score, score
-    cdef int idx_, skip
+    cdef long idx_, skip
 
     i = 0
     j = 0
@@ -121,13 +130,13 @@ def _mrmr(int N, \
                     continue
 
             # accumulate the mutual info with previously selected variables
-            if i > 0 and not maxrel:
+            if i > 0 and method != MAXREL_:
                 redundancies[j] += _mi_h(N, vs[:, ks[i - 1]], vs[:, j], vc, vc, n_vc, n_vc, normalize)
 
             # if we're maxrel or we're on our first feature
-            if i == 0 or maxrel:
+            if i == 0 or method == MAXREL_:
                 score = relevances[j]
-            elif mid:
+            elif method == MID_:
                 score = relevances[j] - (redundancies[j] / i)
             else:
                 # add 0.0001 to prevent division by zero error

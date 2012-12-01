@@ -1,4 +1,15 @@
 
+def mrmr_method(string):
+    method = string.upper()
+    if method == 'MAXREL':
+        return MAXREL
+    elif method == 'MID':
+        return MID
+    elif method == 'MIQ':
+        return MIQ
+    else:
+        raise ValueError('MRMR method must be one of `MAXREL`, `MID`, or `MIQ`')
+
 def test1(args=None):
     import csv
     import os.path
@@ -7,7 +18,7 @@ def test1(args=None):
     from argparse import ArgumentParser, FileType
     from time import time
     import skmrmr
-    from skmrmr._mrmr import _mrmr as mrmr
+    from skmrmr._mrmr import _mrmr as mrmr, MAXREL, MID, MIQ
 
     default_file = os.path.join(
         os.path.dirname(skmrmr.__file__),
@@ -18,8 +29,7 @@ def test1(args=None):
         args = sys.argv[1:]
 
     parser = ArgumentParser(description='minimum redundancy maximum relevance feature selection')
-    parser.add_argument('--maxrel', action='store_true')
-    parser.add_argument('--miq', dest='mutual_info_difference', action='store_false')
+    parser.add_argument('--method', type=mrmr_method, default=MID)
     parser.add_argument('--normalize', action='store_true')
     parser.add_argument('--n_features', type=int, default=10)
     parser.add_argument('--file', type=FileType('r'), default=open(default_file))
@@ -51,13 +61,13 @@ def test1(args=None):
     t = time()
 
     ks, scores = mrmr(N, M, ts, vs, tc, vc, n_tc, n_vc, ns.n_features,
-            ns.maxrel, ns.mutual_info_difference, ns.normalize)
+            ns.method, ns.normalize)
 
     t = time() - t
 
     print("took %.3fs\n" % t)
 
-    print("*** %s features ***" % ("MaxRel" if ns.maxrel else "mRMR"))
+    print("*** %s features ***" % ("MaxRel" if ns.method == MAXREL else "mRMR"))
     for i in range(ns.n_features):
         idx = ks[i] + 1
         print("%d\t%s\t%.3f" % (idx, raw_data[0][idx], scores[i]))

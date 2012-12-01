@@ -8,19 +8,27 @@ __all__ = ['MRMR']
 import numpy as np
 from sklearn.base import BaseEstimator, MetaEstimatorMixin, clone
 from sklearn.utils import check_arrays, safe_mask
-from ._mrmr import _mrmr
+from ._mrmr import _mrmr, MAXREL, MID, MIQ
 
 
 class MRMR(BaseEstimator, MetaEstimatorMixin):
 
     def __init__(self, estimator, n_features_to_select=None,
-            maxrel=False, mutual_info_difference=True, normalize=False,
-            estimator_params={}, verbose=0):
+            method='MID', normalize=False, estimator_params={}, verbose=0):
+
+        method = method.upper()
+        if method == 'MAXREL':
+            method = MAXREL
+        elif method == 'MID':
+            method = MID
+        elif method == 'MIQ':
+            method = MIQ
+        else:
+            raise ValueError('method must be one of `MAXREL`, `MID`, or `MIQ`')
 
         self.estimator = estimator
         self.n_features_to_select = n_features_to_select
-        self.maxrel = maxrel
-        self.mutual_info_difference = mutual_info_difference
+        self.method = method
         self.normalize = normalize
         self.estimator_params = estimator_params
         self.verbose = verbose
@@ -38,8 +46,7 @@ class MRMR(BaseEstimator, MetaEstimatorMixin):
 
         idxs, _ = _mrmr(n_samples, n_features, y, X,
                 y_classes, X_classes, y_classes.shape[0], X_classes.shape[0],
-                n_features_to_select,
-                self.maxrel, self.mutual_info_difference, self.normalize)
+                n_features_to_select, self.method, self.normalize)
 
         support_ = np.zeros(n_features, dtype=np.bool)
         ranking_ = np.zeros(n_features, dtype=np.int)
