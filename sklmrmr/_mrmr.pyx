@@ -26,13 +26,14 @@ MIQ = MIQ_
 
 
 @cython.boundscheck(False)
-cdef dtype_t _mi_h(long N, \
-        itype_t[:] ts, \
-        itype_t[:] vs, \
-        itype_t[:] tc, \
-        itype_t[:] vc, \
-        long n_tc, \
-        long n_vc, \
+cdef dtype_t _mi_h(
+        long N,
+        itype_t[:] ts,
+        itype_t[:] vs,
+        itype_t[:] tc,
+        itype_t[:] vc,
+        long n_tc,
+        long n_vc,
         long normalize):
 
     cdef long i, j, k
@@ -81,16 +82,17 @@ cdef dtype_t _mi_h(long N, \
         return mi
 
 @cython.boundscheck(False)
-def _mrmr(long N, \
-        long M, \
-        itype_t[:] ts, \
-        itype_t[:, :] vs, \
-        itype_t[:] tc, \
-        itype_t[:] vc, \
-        long n_tc, \
-        long n_vc, \
-        long K, \
-        long method, \
+def _mrmr(
+        long N,
+        long M,
+        itype_t[:] ts,
+        itype_t[:, :] vs,
+        itype_t[:] tc,
+        itype_t[:] vc,
+        long n_tc,
+        long n_vc,
+        long K,
+        long method,
         long normalize):
 
     cdef long i, j, k

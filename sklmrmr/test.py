@@ -17,11 +17,11 @@ def test1(args=None):
     import numpy as np
     from argparse import ArgumentParser, FileType
     from time import time
-    import skmrmr
-    from skmrmr._mrmr import _mrmr as mrmr, MAXREL, MID, MIQ
+    import sklmrmr
+    from sklmrmr._mrmr import _mrmr as mrmr, MAXREL, MID, MIQ
 
     default_file = os.path.join(
-        os.path.dirname(skmrmr.__file__),
+        os.path.dirname(sklmrmr.__file__),
         'test_nci9_s3.csv'
         )
 
@@ -77,7 +77,7 @@ def test1(args=None):
 def test2():
     from sklearn.svm import SVC
     from sklearn.datasets import load_digits
-    from skmrmr import MRMR
+    from sklmrmr import MRMR
 
     digits = load_digits()
     X = digits.images.reshape((len(digits.images), -1)).astype(int)
@@ -94,4 +94,4 @@ def test2():
 
 if __name__ == '__main__':
     import sys
-    sys.exit(main())
+    sys.exit(test1())
