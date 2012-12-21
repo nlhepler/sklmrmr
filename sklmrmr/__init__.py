@@ -14,17 +14,12 @@ from ._mrmr import _mrmr, MAXREL, MID, MIQ
 class MRMR(BaseEstimator, MetaEstimatorMixin):
 
     def __init__(self, estimator, n_features_to_select=None,
-            method='MID', normalize=False, estimator_params={}, verbose=0):
+            method='MID', normalize=False, similar=False,
+            estimator_params={}, verbose=0):
 
         method = method.upper()
-        if method == 'MAXREL':
-            method = MAXREL
-        elif method == 'MID':
-            method = MID
-        elif method == 'MIQ':
-            method = MIQ
-        else:
-            raise ValueError('method must be one of `MAXREL`, `MID`, or `MIQ`')
+        if method not in ('MAXREL', 'MID', 'MIQ'):
+            raise ValueError("method must be one of 'MAXREL', 'MID', or 'MIQ'")
 
         self.estimator = estimator
         self.n_features_to_select = n_features_to_select
@@ -36,17 +31,29 @@ class MRMR(BaseEstimator, MetaEstimatorMixin):
     def fit(self, X, y):
         X, y = check_arrays(X, y, sparse_format="csr")
         n_samples, n_features = X.shape
+
         if self.n_features_to_select is None:
             n_features_to_select = n_features // 2
         else:
             n_features_to_select = self.n_features_to_select
 
+        if self.method == 'MAXREL':
+            method = MAXREL
+        elif self.method == 'MID':
+            method = MID
+        elif self.method == 'MIQ':
+            method = MIQ
+        else:
+            raise RuntimeError("unknown method: '{0}'".format(method))
+
         X_classes = np.array(list(set(X.reshape((n_samples * n_features,)))))
         y_classes = np.array(list(set(y.reshape((n_samples,)))))
 
-        idxs, _ = _mrmr(n_samples, n_features, y, X,
-                y_classes, X_classes, y_classes.shape[0], X_classes.shape[0],
-                n_features_to_select, self.method, self.normalize)
+        idxs, _ = _mrmr(n_samples, n_features,
+                y.astype(np.long), X.astype(np.long),
+                y_classes.astype(np.long), X_classes.astype(np.long),
+                y_classes.shape[0], X_classes.shape[0],
+                n_features_to_select, method, self.normalize)
 
         support_ = np.zeros(n_features, dtype=np.bool)
         ranking_ = np.zeros(n_features, dtype=np.int)

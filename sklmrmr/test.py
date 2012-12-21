@@ -8,7 +8,7 @@ def mrmr_method(string):
     elif method == 'MIQ':
         return MIQ
     else:
-        raise ValueError('MRMR method must be one of `MAXREL`, `MID`, or `MIQ`')
+        raise ValueError("MRMR method must be one of 'MAXREL', 'MID', or 'MIQ'")
 
 def test1(args=None):
     import csv
