@@ -1,5 +1,5 @@
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 
 __all__ = ['MRMR']
@@ -60,8 +60,8 @@ class MRMR(BaseEstimator, MetaEstimatorMixin):
 
         support_[idxs] = True
         ranking_[:] = n_features_to_select + 1
-        for i, idx in enumerate(idxs):
-            ranking_[idx] -= n_features_to_select - i
+        for i, idx in enumerate(idxs, start=1):
+            ranking_[idx] = i
 
         self.estimator_ = clone(self.estimator)
         self.estimator_.set_params(**self.estimator_params)
