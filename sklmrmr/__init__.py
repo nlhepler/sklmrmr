@@ -7,11 +7,12 @@ __all__ = ['MRMR']
 
 import numpy as np
 from sklearn.base import BaseEstimator, MetaEstimatorMixin, clone
+from sklearn.feature_selection.base import SelectorMixin
 from sklearn.utils import check_arrays, safe_mask
 from ._mrmr import _mrmr, MAXREL, MID, MIQ
 
 
-class MRMR(BaseEstimator, MetaEstimatorMixin):
+class MRMR(BaseEstimator, MetaEstimatorMixin, SelectorMixin):
 
     def __init__(self, estimator, n_features_to_select=None,
             method='MID', normalize=False, similar=False,
@@ -29,7 +30,7 @@ class MRMR(BaseEstimator, MetaEstimatorMixin):
         self.verbose = verbose
 
     def fit(self, X, y):
-        X, y = check_arrays(X, y, sparse_format="csr")
+        X, y = check_arrays(X, y, sparse_format="csc")
         n_samples, n_features = X.shape
 
         if self.n_features_to_select is None:
@@ -56,10 +57,9 @@ class MRMR(BaseEstimator, MetaEstimatorMixin):
                 n_features_to_select, method, self.normalize)
 
         support_ = np.zeros(n_features, dtype=np.bool)
-        ranking_ = np.zeros(n_features, dtype=np.int)
+        ranking_ = np.ones(n_features, dtype=np.int) + n_features_to_select
 
         support_[idxs] = True
-        ranking_[:] = n_features_to_select + 1
         for i, idx in enumerate(idxs, start=1):
             ranking_[idx] = i
 
@@ -78,8 +78,8 @@ class MRMR(BaseEstimator, MetaEstimatorMixin):
     def score(self, X, y):
         return self.estimator_.score(self.transform(X), y)
 
-    def transform(self, X):
-        return X[:, safe_mask(X, self.support_)]
+    def _get_support_mask(self):
+        return self.support_
 
     def decision_function(self, X):
         return self.estimator_.decision_function(self.transform(X))

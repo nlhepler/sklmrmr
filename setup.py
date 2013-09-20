@@ -32,5 +32,5 @@ setup(name='sklmrmr',
             'sklmrmr': ['*.csv']
       },
       ext_modules=ext_modules,
-      requires=['numpy (>=1.6)', 'sklearn (>=0.12.1)']
+      requires=['numpy (>=1.6)', 'sklearn (>=0.14.0)']
      )
