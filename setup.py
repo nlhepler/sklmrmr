@@ -18,7 +18,7 @@ ext_modules = [
     ]
 
 setup(name='sklmrmr',
-      version='0.1.0',
+      version='0.2.0',
       description='minimum redundancy maximum relevance feature selection',
       author='N Lance Hepler',
       author_email='nlhepler@gmail.com',

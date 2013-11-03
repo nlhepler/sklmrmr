@@ -1,42 +1,39 @@
 
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
 
 __all__ = ['MRMR']
 
 
 import numpy as np
-from sklearn.base import BaseEstimator, MetaEstimatorMixin, clone
+from sklearn.base import BaseEstimator, clone
 from sklearn.feature_selection.base import SelectorMixin
 from sklearn.utils import check_arrays, safe_mask
 from ._mrmr import _mrmr, MAXREL, MID, MIQ
 
 
-class MRMR(BaseEstimator, MetaEstimatorMixin, SelectorMixin):
+class MRMR(BaseEstimator, SelectorMixin):
 
-    def __init__(self, estimator, n_features_to_select=None,
-            method='MID', normalize=False, similar=False,
-            estimator_params={}, verbose=0):
+    def __init__(self, k=None, method='MID', normalize=False, similar=False, verbose=0):
 
         method = method.upper()
         if method not in ('MAXREL', 'MID', 'MIQ'):
             raise ValueError("method must be one of 'MAXREL', 'MID', or 'MIQ'")
 
-        self.estimator = estimator
-        self.n_features_to_select = n_features_to_select
+        self.k = k
         self.method = method
         self.normalize = normalize
-        self.estimator_params = estimator_params
+        self.similar = similar
         self.verbose = verbose
 
     def fit(self, X, y):
         X, y = check_arrays(X, y, sparse_format="csc")
         n_samples, n_features = X.shape
 
-        if self.n_features_to_select is None:
-            n_features_to_select = n_features // 2
+        if self.k is None:
+            k = n_features // 2
         else:
-            n_features_to_select = self.n_features_to_select
+            k = self.k
 
         if self.method == 'MAXREL':
             method = MAXREL
@@ -54,35 +51,20 @@ class MRMR(BaseEstimator, MetaEstimatorMixin, SelectorMixin):
                 y.astype(np.long), X.astype(np.long),
                 y_classes.astype(np.long), X_classes.astype(np.long),
                 y_classes.shape[0], X_classes.shape[0],
-                n_features_to_select, method, self.normalize)
+                k, method, self.normalize)
 
         support_ = np.zeros(n_features, dtype=np.bool)
-        ranking_ = np.ones(n_features, dtype=np.int) + n_features_to_select
+        ranking_ = np.ones(n_features, dtype=np.int) + k
 
         support_[idxs] = True
         for i, idx in enumerate(idxs, start=1):
             ranking_[idx] = i
 
-        self.estimator_ = clone(self.estimator)
-        self.estimator_.set_params(**self.estimator_params)
-        self.estimator_.fit(X[:, support_], y)
         self.n_features_ = support_.sum()
         self.support_ = support_
         self.ranking_ = ranking_
 
         return self
 
-    def predict(self, X):
-        return self.estimator_.predict(self.transform(X))
-
-    def score(self, X, y):
-        return self.estimator_.score(self.transform(X), y)
-
     def _get_support_mask(self):
         return self.support_
-
-    def decision_function(self, X):
-        return self.estimator_.decision_function(self.transform(X))
-
-    def predict_proba(self, X):
-        return self.estimator_.predict_proba(self.transform(X))
